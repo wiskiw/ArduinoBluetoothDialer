@@ -1,3 +1,16 @@
+#include <SPI.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+#define SCREEN_WIDTH 128 // OLED display width, in pixels
+#define SCREEN_HEIGHT 64 // OLED display height, in pixels
+
+// SCL - A5
+// SDA - A4
+// Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
+#define OLED_RESET -1 // Reset pin # (or -1 if sharing Arduino reset pin)
+
 // пин ввода цифры подключает
 // подключается через внешний pulldown резистор
 #define PIN_DIALER_NUMBERS 2
@@ -8,6 +21,8 @@
 
 #define DEBOUNCER_DIALER_MILLISECONDS 80
 #define DEBOUNCER_DIALER_LOCKER_MILLISECONDS 80
+
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 // таймеры компенсации дребезга
 volatile unsigned long debouncerDialerTimer = 0;
@@ -23,8 +38,25 @@ bool isDialingInProgress = false;
 void setup() {
   Serial.begin(9600);
 
+  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
+  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3D for 128x64
+    Serial.println(F("SSD1306 allocation failed"));
+    for(;;); // Don't proceed, loop forever
+  }
+
   attachInterrupt(digitalPinToInterrupt(PIN_DIALER_NUMBERS), onDialerIntrrupt, FALLING);
   pinMode(PIN_DIALER_LOCKER, INPUT);
+
+  printReady();
+}
+
+void printReady(){
+  display.clearDisplay();
+  display.setTextSize(2);             // Normal 1:1 pixel scale
+  display.setTextColor(SSD1306_WHITE);        // Draw white text
+  display.setCursor(32,26);             // Start at top-left corner
+  display.println(F("READY!"));
+  display.display();
 }
 
 void onDialerIntrrupt() {
@@ -101,4 +133,22 @@ void printValue(bool isFinal, byte value) {
     if(isFinal) Serial.print("[F]");
     Serial.print("input value: ");
     Serial.println(value);
+
+
+    display.clearDisplay();
+    
+    display.setTextSize(1);             // Normal 1:1 pixel scale
+    display.setTextColor(SSD1306_WHITE);        // Draw white text
+    display.setCursor(0,0);             // Start at top-left corner
+    display.println(F("value: "));
+    
+    display.setCursor(56,24);             // Start at top-left corner
+    display.setTextSize(4);             // Normal 1:1 pixel scale
+    display.println(value);
+
+    if(isFinal){
+        display.fillRect(80, 48, 4, 4, WHITE);
+    }
+    
+    display.display();
 }
