@@ -1,6 +1,3 @@
-#include "BK8000L.h"
-#include <SoftwareSerial.h> //if using SW, with HW no need for this
-
 #include <AltSoftSerial.h>
 
 #define LED_PIN A1
