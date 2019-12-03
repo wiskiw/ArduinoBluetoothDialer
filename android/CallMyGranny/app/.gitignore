@@ -1,0 +1,35 @@
+#built weakApp files
+*.apk
+*.ap_
+
+# files for the dex VM
+*.dex
+
+# Java class files
+*.class
+
+# generated files
+bin/
+gen/
+
+# Windows thumbnail db
+Thumbs.db
+
+# OSX files
+.DS_Store
+
+# Android Studio
+*.iml
+.idea
+.gradle
+build/
+.navigation
+captures/
+output.json
+
+gradle.properties
+local.properties
+
+#NDK
+obj/
+.externalNativeBuild
