@@ -9,6 +9,16 @@
         tools:context=".ui.MainActivity">
 
     <Button
+            android:id="@+id/connect"
+            style="@style/Button.Secondary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/padding_small"
+            android:layout_marginBottom="@dimen/padding_small"
+            android:text="@string/connect_text"
+            app:layout_constraintBottom_toBottomOf="top" />
+
+    <Button
             android:id="@+id/contacts"
             style="@style/Button.Secondary"
             android:layout_width="match_parent"

@@ -10,6 +10,11 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        compileOptions {
+            sourceCompatibility JavaVersion.VERSION_1_8
+            targetCompatibility JavaVersion.VERSION_1_8
+        }
     }
     buildTypes {
         release {
@@ -26,6 +31,10 @@ dependencies {
 
     // Paper DB
     implementation 'io.paperdb:paperdb:2.6'
+
+    // BluetoothSPP
+    // https://github.com/akexorcist/Android-BluetoothSPPLibrary
+    implementation 'com.akexorcist:bluetoothspp:1.0.0'
 
     testImplementation 'junit:junit:4.12'
 }

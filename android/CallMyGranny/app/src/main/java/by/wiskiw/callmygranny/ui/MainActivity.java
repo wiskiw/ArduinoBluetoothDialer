@@ -3,7 +3,6 @@ package by.wiskiw.callmygranny.ui;
 import java.util.List;
 
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
 import by.wiskiw.callmygranny.AndroidApp;
@@ -14,32 +13,35 @@ import by.wiskiw.callmygranny.model.ARDContact;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String GRANNY_PHONE_BLUETOOTH_MAC = "FC:58:FA:BA:02:7D";
+
     private AndroidApp app = AndroidApp.getInstance();
 
-    private Button contacts;
-    private Button sync;
+    private ARDBluetoothTransmitter transmitter = app.getARDBluetoothTransmitter();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        contacts = findViewById(R.id.contacts);
-        sync = findViewById(R.id.sync);
+        Button connect = findViewById(R.id.connect);
+        connect.setOnClickListener(v -> connect());
 
-        sync.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                syncData();
-            }
-        });
+        // todo
+        Button contacts = findViewById(R.id.contacts);
+
+        Button sync = findViewById(R.id.sync);
+        sync.setOnClickListener(v -> syncData());
+    }
+
+    private void connect() {
+        transmitter.connect(GRANNY_PHONE_BLUETOOTH_MAC);
     }
 
     private void syncData() {
         List<ARDContact> contacts = app.getContactsStorage().readContacts();
         byte[] bytes = new ContactsSerializer().serialise(contacts);
 
-        // todo откравка данных
-        new ARDBluetoothTransmitter().send(bytes);
+        transmitter.send(bytes);
     }
 }
