@@ -1,11 +1,13 @@
 package by.wiskiw.callmygranny.ui;
 
+import java.util.Arrays;
 import java.util.List;
 
 import android.os.Bundle;
 import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
 import by.wiskiw.callmygranny.AndroidApp;
+import by.wiskiw.callmygranny.Logger;
 import by.wiskiw.callmygranny.R;
 import by.wiskiw.callmygranny.data.ContactsSerializer;
 import by.wiskiw.callmygranny.data.bluetooth.ARDBluetoothTransmitter;
@@ -42,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
         List<ARDContact> contacts = app.getContactsStorage().readContacts();
         byte[] bytes = new ContactsSerializer().serialise(contacts);
 
-        transmitter.send(bytes);
+        Logger.log(getClass(), "size: " + bytes.length);
+        Logger.log(getClass(), "bytes: " + Arrays.toString(bytes));
+        //transmitter.send(bytes);
     }
 }

@@ -3,9 +3,9 @@ package by.wiskiw.callmygranny;
 /**
  * @author Andrey Yablonsky on 03.12.2019
  */
-public class Utils {
+public class ArrayUtils {
 
-    public static byte[] concatBytes(byte[]... arrays) {
+    public static byte[] concat(byte[]... arrays) {
         // Determine the length of the result array
         int totalLength = 0;
         for (int i = 0; i < arrays.length; i++) {
