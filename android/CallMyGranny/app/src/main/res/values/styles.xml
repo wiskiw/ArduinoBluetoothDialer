@@ -1,0 +1,11 @@
+<resources>
+
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar"></style>
+
+    <style name="Button.Primary" parent="Widget.AppCompat.Button">
+    </style>
+
+    <style name="Button.Secondary" parent="Widget.AppCompat.Button">
+    </style>
+
+</resources>
