@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Call My Granny</string>
+
+    <!--Main -->
+    <string name="choose_contacts_text">Контакты</string>
+    <string name="sync_text">SYNC!</string>
 </resources>
