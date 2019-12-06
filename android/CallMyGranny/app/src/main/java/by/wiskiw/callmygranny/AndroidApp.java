@@ -1,9 +1,9 @@
 package by.wiskiw.callmygranny;
 
 import android.app.Application;
-import app.akexorcist.bluetotohspp.library.BluetoothSPP;
 import by.wiskiw.callmygranny.data.ContactsStorage;
-import by.wiskiw.callmygranny.data.bluetooth.ARDBluetoothTransmitter;
+import by.wiskiw.callmygranny.data.bluetooth.service.BluetoothService;
+import by.wiskiw.callmygranny.data.bluetooth.service.DouglasJuniorBluetoothService;
 import io.paperdb.Book;
 import io.paperdb.Paper;
 
@@ -16,7 +16,7 @@ public class AndroidApp extends Application {
 
     private ContactsStorage contactsStorage;
 
-    private ARDBluetoothTransmitter ardBluetoothTransmitter;
+    private BluetoothService bluetoothService;
 
     public static AndroidApp getInstance() {
         return appInstance;
@@ -31,20 +31,14 @@ public class AndroidApp extends Application {
         Book mainBook = Paper.book();
 
         contactsStorage = new ContactsStorage(mainBook);
-
-        initBluetooth();
-    }
-
-    private void initBluetooth() {
-        BluetoothSPP bluetoothSPP = new BluetoothSPP(this);
-        ardBluetoothTransmitter = new ARDBluetoothTransmitter(bluetoothSPP);
+        bluetoothService = new DouglasJuniorBluetoothService();
     }
 
     public ContactsStorage getContactsStorage() {
         return contactsStorage;
     }
 
-    public ARDBluetoothTransmitter getARDBluetoothTransmitter() {
-        return ardBluetoothTransmitter;
+    public BluetoothService getBluetoothService() {
+        return bluetoothService;
     }
 }

@@ -10,7 +10,7 @@ import by.wiskiw.callmygranny.AndroidApp;
 import by.wiskiw.callmygranny.Logger;
 import by.wiskiw.callmygranny.R;
 import by.wiskiw.callmygranny.data.ContactsSerializer;
-import by.wiskiw.callmygranny.data.bluetooth.ARDBluetoothTransmitter;
+import by.wiskiw.callmygranny.data.bluetooth.service.BluetoothService;
 import by.wiskiw.callmygranny.model.ARDContact;
 
 public class MainActivity extends AppCompatActivity {
@@ -19,12 +19,15 @@ public class MainActivity extends AppCompatActivity {
 
     private AndroidApp app = AndroidApp.getInstance();
 
-    private ARDBluetoothTransmitter transmitter = app.getARDBluetoothTransmitter();
+    private BluetoothService bluetoothService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        bluetoothService = app.getBluetoothService();
+        bluetoothService.setup(this);
 
         Button connect = findViewById(R.id.connect);
         connect.setOnClickListener(v -> connect());
@@ -37,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void connect() {
-        transmitter.connect(GRANNY_PHONE_BLUETOOTH_MAC);
+        bluetoothService.connect(GRANNY_PHONE_BLUETOOTH_MAC);
     }
 
     private void syncData() {
@@ -46,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
 
         Logger.log(getClass(), "size: " + bytes.length);
         Logger.log(getClass(), "bytes: " + Arrays.toString(bytes));
-        //transmitter.send(bytes);
+
+        bluetoothService.send(bytes);
     }
 }
