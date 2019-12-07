@@ -2,6 +2,7 @@ package by.wiskiw.callmygranny;
 
 import android.app.Application;
 import by.wiskiw.callmygranny.data.ContactsStorage;
+import by.wiskiw.callmygranny.data.bluetooth.service.Blue2SerialBluetoothService;
 import by.wiskiw.callmygranny.data.bluetooth.service.BluetoothService;
 import by.wiskiw.callmygranny.data.bluetooth.service.DouglasJuniorBluetoothService;
 import io.paperdb.Book;
@@ -31,7 +32,7 @@ public class AndroidApp extends Application {
         Book mainBook = Paper.book();
 
         contactsStorage = new ContactsStorage(mainBook);
-        bluetoothService = new DouglasJuniorBluetoothService();
+        //bluetoothService = new DouglasJuniorBluetoothService();
     }
 
     public ContactsStorage getContactsStorage() {
@@ -39,6 +40,6 @@ public class AndroidApp extends Application {
     }
 
     public BluetoothService getBluetoothService() {
-        return bluetoothService;
+        return new Blue2SerialBluetoothService();
     }
 }

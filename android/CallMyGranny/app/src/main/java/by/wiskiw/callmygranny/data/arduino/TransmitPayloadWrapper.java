@@ -49,7 +49,11 @@ public class TransmitPayloadWrapper {
         }
 
         // в первые два байта записываем кол-во пакетов для передачи
-        byte[] header = ByteBuffer.allocate(PACK_SIZE).putShort((short) packList.size()).array();
+        byte[] header = ByteBuffer
+            .allocate(PACK_SIZE)
+            .putShort((short) packList.size())
+            .array();
+
         return encoder.encode(header);
     }
 

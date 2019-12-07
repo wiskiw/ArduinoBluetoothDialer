@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import android.os.Handler;
+import by.wiskiw.callmygranny.Logger;
 import by.wiskiw.callmygranny.data.bluetooth.service.BluetoothService;
 
 /**
@@ -74,14 +75,15 @@ public class ArduinoTransmitter implements BluetoothService.ReceiveListener {
 
     // Отправляет заголовочные байты
     private void sendHeader(byte[] header) {
+        Logger.log(getClass(), "sendHeader: " + Arrays.toString(header));
         service.send(header);
     }
 
     private void sendNextOrFinish() {
         List<byte[]> packList = payload.getPackList();
 
-        transmitedPacksCounter++;
         transmitterListener.onProgress(packList.size(), transmitedPacksCounter);
+        transmitedPacksCounter++;
 
         if (nextPackIndex < packList.size()) {
             delayHandler.postDelayed(new SendNextPackRunnable(), PACK_SEND_DELAY);
@@ -95,6 +97,7 @@ public class ArduinoTransmitter implements BluetoothService.ReceiveListener {
         byte[] pack = payload.getPackList().get(nextPackIndex);
         service.send(pack);
         nextPackIndex++;
+        Logger.log(getClass(), "sendNextPack: " + Arrays.toString(pack));
     }
 
     @Override

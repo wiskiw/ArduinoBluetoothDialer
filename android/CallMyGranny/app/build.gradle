@@ -35,5 +35,8 @@ dependencies {
     // https://github.com/douglasjunior/AndroidBluetoothLibrary
     implementation 'com.github.douglasjunior.AndroidBluetoothLibrary:BluetoothClassicLibrary:0.3.5'
 
+    // https://github.com/MacroYau/Blue2Serial
+    implementation 'com.macroyau:blue2serial:0.1.5'
+
     testImplementation 'junit:junit:4.12'
 }
