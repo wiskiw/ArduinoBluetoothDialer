@@ -71,6 +71,11 @@ public class TransmitPayloadWrapper {
         public byte[] encode(byte[] bytes) {
             return bytes;
         }
+
+        @Override
+        public byte[] decode(byte[] bytes) {
+            return bytes;
+        }
     }
 
 }
