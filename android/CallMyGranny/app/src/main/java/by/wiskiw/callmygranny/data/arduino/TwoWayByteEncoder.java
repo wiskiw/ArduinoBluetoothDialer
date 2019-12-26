@@ -3,11 +3,10 @@ package by.wiskiw.callmygranny.data.arduino;
 /**
  * @author Andrey Yablonsky on 06.12.2019
  */
-public interface ByteEncoder {
+public interface TwoWayByteEncoder {
 
-    /**
-     * Кодирует данные с сохранением длинны
-     */
     byte[] encode(byte[] bytes);
+
+    byte[] decode(byte[] bytes);
 
 }

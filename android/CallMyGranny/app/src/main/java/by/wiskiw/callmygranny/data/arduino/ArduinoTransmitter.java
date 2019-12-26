@@ -43,7 +43,7 @@ public class ArduinoTransmitter implements BluetoothService.ReceiveListener {
     // Нужна для уверенности, что Arduino успеет обработать предыдущую
     private static final long PACK_SEND_DELAY = 10; // ms
 
-    private static final ArduinoByteEncoder packEncoder = new ArduinoByteEncoder();
+    private static final ArduinoTwoWayByteEncoder packEncoder = new ArduinoTwoWayByteEncoder();
 
 
     private final BluetoothService service;
@@ -142,28 +142,6 @@ public class ArduinoTransmitter implements BluetoothService.ReceiveListener {
         @Override
         public void run() {
             sendNextPack();
-        }
-    }
-
-    /**
-     * Энкодер заменяет все NULL-байты на NULL_REPLACEMENT.
-     * Т. к. модуль BK8000L не передает последовательность байт следующую за NULL-байтом.
-     * Декодирование происходит на Arduino.
-     */
-    private static final class ArduinoByteEncoder implements ByteEncoder {
-
-        private static final byte NULL_REPLACEMENT = 1;
-
-        @Override
-        public byte[] encode(byte[] bytes) {
-            byte[] encoded = new byte[bytes.length];
-
-            for (int i = 0; i < bytes.length; i++) {
-                byte item = bytes[i];
-                encoded[i] = item == 0 ? NULL_REPLACEMENT : item;
-            }
-
-            return encoded;
         }
     }
 

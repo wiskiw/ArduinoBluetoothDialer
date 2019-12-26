@@ -16,16 +16,16 @@ public class TransmitPayloadWrapper {
     private List<byte[]> packList;
     private byte[] header;
 
-    public TransmitPayloadWrapper(ByteEncoder encoder, byte[] data) {
+    public TransmitPayloadWrapper(TwoWayByteEncoder encoder, byte[] data) {
         packList = createPacks(encoder, data);
         header = createHeader(encoder, packList);
     }
 
     public TransmitPayloadWrapper(byte[] data) {
-        this(new NoneByteEncoder(), data);
+        this(new NoneTwoWayByteEncoder(), data);
     }
 
-    private List<byte[]> createPacks(ByteEncoder encoder, byte[] data) {
+    private List<byte[]> createPacks(TwoWayByteEncoder encoder, byte[] data) {
         List<byte[]> packs = new ArrayList<>();
         int headIndex = 0;
 
@@ -42,7 +42,7 @@ public class TransmitPayloadWrapper {
         return packs;
     }
 
-    private byte[] createHeader(ByteEncoder encoder, List<byte[]> packList) {
+    private byte[] createHeader(TwoWayByteEncoder encoder, List<byte[]> packList) {
         if (packList.size() > MAX_DATA_PACKS_COUNT) {
             throw new IllegalArgumentException(String.format("Data size must be less than %d. But it's %d!",
                 PACK_SIZE, packList.size()));
@@ -65,7 +65,7 @@ public class TransmitPayloadWrapper {
         return packList;
     }
 
-    private static final class NoneByteEncoder implements ByteEncoder {
+    private static final class NoneTwoWayByteEncoder implements TwoWayByteEncoder {
 
         @Override
         public byte[] encode(byte[] bytes) {
