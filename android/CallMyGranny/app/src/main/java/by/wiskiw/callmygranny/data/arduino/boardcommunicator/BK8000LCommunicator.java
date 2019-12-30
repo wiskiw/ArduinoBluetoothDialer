@@ -17,8 +17,14 @@ import by.wiskiw.callmygranny.data.bluetooth.service.BluetoothService;
  */
 public class BK8000LCommunicator implements BoardCommunicator {
 
-    private static final int MAX_PAYLOAD_SIZE_BYTES = 56;
+    // 64 - arduino buffer size
+    // -4 - APR+
+    // -2 - /r/n
+    // =58
+    private static final int MAX_DATA_SIZE_BYTES = 58;
+
     private static final byte ZERO_BYTE = 0;
+
 
     private final List<BoardCommunicator.PayloadListener> payloadListeners = new ArrayList<>();
     private final BluetoothService bluetoothService;
@@ -47,9 +53,9 @@ public class BK8000LCommunicator implements BoardCommunicator {
             throw new IllegalStateException("Cannot send bytes while communicator is transmitting!");
         }
 
-        if (data.length > MAX_PAYLOAD_SIZE_BYTES) {
+        if (data.length > MAX_DATA_SIZE_BYTES) {
             throw new IllegalArgumentException(String.format("Data is too big! Max available size is %d, but %d received.",
-                MAX_PAYLOAD_SIZE_BYTES, data.length));
+                MAX_DATA_SIZE_BYTES, data.length));
         }
 
         int zeroByteIndex = Arrays.asList(data).indexOf(ZERO_BYTE);

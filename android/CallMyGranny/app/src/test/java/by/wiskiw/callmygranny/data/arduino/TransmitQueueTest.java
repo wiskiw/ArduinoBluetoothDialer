@@ -1,4 +1,4 @@
-package by.wiskiw.callmygranny.data.arduino.sendqueue;
+package by.wiskiw.callmygranny.data.arduino;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -14,18 +14,16 @@ import by.wiskiw.callmygranny.data.arduino.boardcommunicator.BoardCommunicator;
 import by.wiskiw.callmygranny.data.arduino.boardcommunicator.MirrorBoardCommunicator;
 
 /**
- * Test unit for {@link BoardSendQueue}.
- *
  * @author Andrey Yablonsky on 30.12.2019
  */
-public class BoardSendQueueTest {
+public class TransmitQueueTest {
 
-    private BoardCommunicator boardCommunicator;
+    private TransmitQueue communicatorService;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        boardCommunicator = new MirrorBoardCommunicator();
+        communicatorService = new TransmitQueue(new MirrorBoardCommunicator());
     }
 
     @Test
@@ -36,11 +34,9 @@ public class BoardSendQueueTest {
 
         BoardCommunicator.SendListener mockSendListener = mock(BoardCommunicator.SendListener.class);
 
-        new BoardSendQueue(boardCommunicator)
-            .add(payload1, mockSendListener)
-            .add(payload2, mockSendListener)
-            .add(payload3, mockSendListener)
-            .sendAll();
+        communicatorService.send(payload1, mockSendListener);
+        communicatorService.send(payload2, mockSendListener);
+        communicatorService.send(payload3, mockSendListener);
 
         verify(mockSendListener, timeout(100).times(3)).onSuccess();
         verify(mockSendListener, never()).onFailed();
@@ -51,16 +47,14 @@ public class BoardSendQueueTest {
         byte[] payload1 = "Hello".getBytes();
         byte[] payload2 = "World".getBytes();
         byte[] payload3 = "!".getBytes();
-        BoardCommunicator.SendListener mockSendListener = mock(BoardCommunicator.SendListener.class);
 
         BoardCommunicator.PayloadListener mockPayloadListener = mock(BoardCommunicator.PayloadListener.class);
-        boardCommunicator.addPayloadListener(mockPayloadListener);
+        communicatorService.addPayloadListener(mockPayloadListener);
 
-        new BoardSendQueue(boardCommunicator)
-            .add(payload1, mockSendListener)
-            .add(payload2, mockSendListener)
-            .add(payload3, mockSendListener)
-            .sendAll();
+        BoardCommunicator.SendListener mockSendListener = mock(BoardCommunicator.SendListener.class);
+        communicatorService.send(payload1, mockSendListener);
+        communicatorService.send(payload2, mockSendListener);
+        communicatorService.send(payload3, mockSendListener);
 
         InOrder listenerInOrderWrapper = inOrder(mockPayloadListener);
         listenerInOrderWrapper.verify(mockPayloadListener).onPayloadReceived(payload1);

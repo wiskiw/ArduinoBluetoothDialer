@@ -5,17 +5,14 @@ import java.util.List;
 
 import by.wiskiw.callmygranny.data.arduino.boardcommunicator.BoardCommunicator;
 import by.wiskiw.callmygranny.data.arduino.encoding.ByteEncoder;
-import by.wiskiw.callmygranny.data.arduino.sendqueue.BoardSendQueue;
 
 /**
- * Реализует отправку массива байт любой длинны через {@link BoardCommunicator}
+ * Реализует отправку массива байт любой длинны через {@link TransmitQueue}
  * <ul>
  *     <li>Кодирует отправляемые байты</li>
  *     <li>Добавляет HEADER для отправляемых байт</li>
  *     <li>Разделяет байты на группы, отправляет по частям</li>
  * </ul>
- *
- * todo: добавить проверку на доступность BoardCommunicator
  *
  * @author Andrey Yablonsky on 26.12.2019
  */
@@ -24,51 +21,47 @@ public class TransmitController {
     private static final int HEADER_SIZE_BYTE = 4;
     private static final int PACK_SIZE_BYTE = 56;
 
-    private final BoardSendQueue boardSendQueue;
+    private final TransmitQueue transmitQueue;
     private final ByteEncoder encoder;
 
-    private Listener listener;
-
-    public TransmitController(BoardCommunicator boardCommunicator, ByteEncoder encoder) {
-        this.boardSendQueue = new BoardSendQueue(boardCommunicator);
+    public TransmitController(TransmitQueue transmitQueue, ByteEncoder encoder) {
+        this.transmitQueue = transmitQueue;
         this.encoder = encoder;
     }
 
     public void send(byte[] data, Listener listener) {
-        this.listener = listener;
-
         byte[] encodedBytes = encoder.encode(data);
 
         List<byte[]> packs = divideForPackages(PACK_SIZE_BYTE, encodedBytes);
         byte[] header = createHeader(HEADER_SIZE_BYTE, encodedBytes, packs);
 
-        startTransaction(header, packs);
+        startTransaction(header, packs, listener);
     }
 
-    private void startTransaction(byte[] header, List<byte[]> packs) {
+    private void startTransaction(byte[] header, List<byte[]> packs, Listener listener) {
         int headerPacksCount = 1;
         int allPacksCount = headerPacksCount + packs.size();
         listener.onProgressChanged(allPacksCount, 0);
 
-        boardSendQueue.add(header, new SendListener(allPacksCount, 1));
+        transmitQueue.send(header, new SendListener(listener, allPacksCount, 1));
 
         for (int packIndex = 0; packIndex < packs.size(); packIndex++) {
             byte[] pack = packs.get(packIndex);
 
             // packIndex + 1 - переход от индекса к номеру
             int packNumber = headerPacksCount + packIndex + 1;
-            boardSendQueue.add(pack, new SendListener(allPacksCount, packNumber));
+            transmitQueue.send(pack, new SendListener(listener, allPacksCount, packNumber));
         }
-
-        boardSendQueue.sendAll();
     }
 
     private final class SendListener implements BoardCommunicator.SendListener {
 
+        private final Listener listener;
         private final int packsCount;
         private final int currentPackNumber;
 
-        private SendListener(int packsCount, int currentPackNumber) {
+        private SendListener(Listener listener, int packsCount, int currentPackNumber) {
+            this.listener = listener;
             this.packsCount = packsCount;
             this.currentPackNumber = currentPackNumber;
         }
