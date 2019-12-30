@@ -1,13 +1,15 @@
 package by.wiskiw.callmygranny.data.arduino;
 
 import java.util.Arrays;
-import java.util.List;
 
 import android.os.Handler;
 import by.wiskiw.callmygranny.Logger;
+import by.wiskiw.callmygranny.data.arduino.encoding.NonZeroTwoWayByteEncoder;
 import by.wiskiw.callmygranny.data.bluetooth.service.BluetoothService;
 
 /**
+ * @deprecated Требует переработки
+ *
  * Выполняет передачу byte-s на Arduino через {@link BluetoothService}.
  * <p>
  * Особенности:
@@ -43,7 +45,7 @@ public class ArduinoTransmitter implements BluetoothService.ReceiveListener {
     // Нужна для уверенности, что Arduino успеет обработать предыдущую
     private static final long PACK_SEND_DELAY = 10; // ms
 
-    private static final ArduinoTwoWayByteEncoder packEncoder = new ArduinoTwoWayByteEncoder();
+    private static final NonZeroTwoWayByteEncoder packEncoder = new NonZeroTwoWayByteEncoder();
 
 
     private final BluetoothService service;
@@ -53,7 +55,7 @@ public class ArduinoTransmitter implements BluetoothService.ReceiveListener {
     private int nextPackIndex = 0; // индекс следующего пакета байт для отправки
     private int transmitedPacksCounter = 0; // кол-во успешно доставленных пакетов
 
-    private TransmitPayloadWrapper payload;
+    //    private TransmitPayloadWrapper payload;
     private TransmitterListener transmitterListener;
 
     private ArduinoTransmitter(BluetoothService service) {
@@ -67,10 +69,10 @@ public class ArduinoTransmitter implements BluetoothService.ReceiveListener {
             throw new IllegalStateException("Cannot send next bytes until current transmission are not finished!");
         }
 
-        payload = new TransmitPayloadWrapper(packEncoder, data);
+//        payload = new TransmitPayloadWrapper(packEncoder, data);
 
         resetTransmission();
-        sendHeader(payload.getHeader());
+//        sendHeader(payload.getHeader());
     }
 
     // Отправляет заголовочные байты
@@ -80,24 +82,24 @@ public class ArduinoTransmitter implements BluetoothService.ReceiveListener {
     }
 
     private void sendNextOrFinish() {
-        List<byte[]> packList = payload.getPackList();
-
-        transmitterListener.onProgress(packList.size(), transmitedPacksCounter);
-        transmitedPacksCounter++;
-
-        if (nextPackIndex < packList.size()) {
-            delayHandler.postDelayed(new SendNextPackRunnable(), PACK_SEND_DELAY);
-        } else {
-            changeTransmitStatus(false);
-            transmitterListener.onSuccess();
-        }
+//        List<byte[]> packList = payload.getPackList();
+//
+//        transmitterListener.onProgress(packList.size(), transmitedPacksCounter);
+//        transmitedPacksCounter++;
+//
+//        if (nextPackIndex < packList.size()) {
+//            delayHandler.postDelayed(new SendNextPackRunnable(), PACK_SEND_DELAY);
+//        } else {
+//            changeTransmitStatus(false);
+//            transmitterListener.onSuccess();
+//        }
     }
 
     private void sendNextPack() {
-        byte[] pack = payload.getPackList().get(nextPackIndex);
-        service.send(pack);
-        nextPackIndex++;
-        Logger.log(getClass(), "sendNextPack: " + Arrays.toString(pack));
+//        byte[] pack = payload.getPackList().get(nextPackIndex);
+//        service.send(pack);
+//        nextPackIndex++;
+//        Logger.log(getClass(), "sendNextPack: " + Arrays.toString(pack));
     }
 
     @Override

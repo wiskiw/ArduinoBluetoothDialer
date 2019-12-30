@@ -1,4 +1,4 @@
-package by.wiskiw.callmygranny.data.arduino;
+package by.wiskiw.callmygranny.data.arduino.encoding;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
@@ -8,13 +8,10 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import by.wiskiw.callmygranny.BitUtils;
 
-
 /**
  * Двухсторонний энкодер. Кодирует последовательность байт, не используя ноль-байты.
- * <p>
- * Используется ждя модуля BK8000L, т. к он не передает последовательность байт следующую за NULL-байтом.
  */
-public final class ArduinoTwoWayByteEncoder implements TwoWayByteEncoder {
+public final class NonZeroTwoWayByteEncoder implements ByteEncoder, ByteDecoder {
 
     private static final byte ZERO_BYTE = 0;
 

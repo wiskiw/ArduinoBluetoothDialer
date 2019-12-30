@@ -1,20 +1,20 @@
-package by.wiskiw.callmygranny;
+package by.wiskiw.callmygranny.data.arduino.encoding;
 
 import java.util.Arrays;
 
 import org.junit.Test;
 import static org.junit.Assert.assertArrayEquals;
 
-import by.wiskiw.callmygranny.data.arduino.ArduinoTwoWayByteEncoder;
+import by.wiskiw.callmygranny.data.arduino.encoding.NonZeroTwoWayByteEncoder;
 
 /**
- * Unit test for {@link ArduinoTwoWayByteEncoder}
+ * Unit test for {@link NonZeroTwoWayByteEncoder}
  *
  * @author Andrey Yablonsky on 14.12.2019
  */
-public class ArduinoTwoWayByteEncoderTest {
+public class NonZeroTwoWayByteEncoderTest {
 
-    private final ArduinoTwoWayByteEncoder twoWayEncoder = new ArduinoTwoWayByteEncoder();
+    private final NonZeroTwoWayByteEncoder twoWayEncoder = new NonZeroTwoWayByteEncoder();
 
     ///////////////////////////////////
     // ENCODE TESTS
