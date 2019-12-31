@@ -5,8 +5,6 @@ import java.util.Arrays;
 import org.junit.Test;
 import static org.junit.Assert.assertArrayEquals;
 
-import by.wiskiw.callmygranny.data.arduino.encoding.NonZeroTwoWayByteEncoder;
-
 /**
  * Unit test for {@link NonZeroTwoWayByteEncoder}
  *

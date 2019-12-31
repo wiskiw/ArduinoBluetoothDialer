@@ -8,9 +8,11 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import by.wiskiw.callmygranny.data.arduino.boardcommunicator.BoardCommunicator;
+import by.wiskiw.callmygranny.data.arduino.boardcommunicator.FailedBoardCommunicator;
 import by.wiskiw.callmygranny.data.arduino.boardcommunicator.MirrorBoardCommunicator;
 
 /**
@@ -18,12 +20,14 @@ import by.wiskiw.callmygranny.data.arduino.boardcommunicator.MirrorBoardCommunic
  */
 public class TransmitQueueTest {
 
-    private TransmitQueue communicatorService;
+    private static final long POST_SEND_DELAY = 0;
+
+    private TransmitQueue transmitQueue;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        communicatorService = new TransmitQueue(new MirrorBoardCommunicator());
+        transmitQueue = new TransmitQueue(new MirrorBoardCommunicator());
     }
 
     @Test
@@ -34,9 +38,9 @@ public class TransmitQueueTest {
 
         BoardCommunicator.SendListener mockSendListener = mock(BoardCommunicator.SendListener.class);
 
-        communicatorService.send(payload1, mockSendListener);
-        communicatorService.send(payload2, mockSendListener);
-        communicatorService.send(payload3, mockSendListener);
+        transmitQueue.send(payload1, POST_SEND_DELAY, mockSendListener);
+        transmitQueue.send(payload2, POST_SEND_DELAY, mockSendListener);
+        transmitQueue.send(payload3, POST_SEND_DELAY, mockSendListener);
 
         verify(mockSendListener, timeout(100).times(3)).onSuccess();
         verify(mockSendListener, never()).onFailed();
@@ -49,17 +53,37 @@ public class TransmitQueueTest {
         byte[] payload3 = "!".getBytes();
 
         BoardCommunicator.PayloadListener mockPayloadListener = mock(BoardCommunicator.PayloadListener.class);
-        communicatorService.addPayloadListener(mockPayloadListener);
+        transmitQueue.addPayloadListener(mockPayloadListener);
 
         BoardCommunicator.SendListener mockSendListener = mock(BoardCommunicator.SendListener.class);
-        communicatorService.send(payload1, mockSendListener);
-        communicatorService.send(payload2, mockSendListener);
-        communicatorService.send(payload3, mockSendListener);
+        transmitQueue.send(payload1, POST_SEND_DELAY, mockSendListener);
+        transmitQueue.send(payload2, POST_SEND_DELAY, mockSendListener);
+        transmitQueue.send(payload3, POST_SEND_DELAY, mockSendListener);
 
         InOrder listenerInOrderWrapper = inOrder(mockPayloadListener);
         listenerInOrderWrapper.verify(mockPayloadListener).onPayloadReceived(payload1);
         listenerInOrderWrapper.verify(mockPayloadListener).onPayloadReceived(payload2);
         listenerInOrderWrapper.verify(mockPayloadListener).onPayloadReceived(payload3);
+    }
+
+    @Test
+    public void failedSendTest() {
+        byte[] payload1 = "Hello".getBytes();
+        byte[] payload2 = "World".getBytes();
+        byte[] payload3 = "!".getBytes();
+
+        TransmitQueue failedTransmitQueue = new TransmitQueue(new FailedBoardCommunicator());
+
+        BoardCommunicator.PayloadListener mockPayloadListener = mock(BoardCommunicator.PayloadListener.class);
+        failedTransmitQueue.addPayloadListener(mockPayloadListener);
+
+        BoardCommunicator.SendListener mockSendListener = mock(BoardCommunicator.SendListener.class);
+        failedTransmitQueue.send(payload1, POST_SEND_DELAY, mockSendListener);
+        failedTransmitQueue.send(payload2, POST_SEND_DELAY, mockSendListener);
+        failedTransmitQueue.send(payload3, POST_SEND_DELAY, mockSendListener);
+
+        verify(mockSendListener, times(3)).onFailed();
+        verify(mockSendListener, never()).onSuccess();
     }
 
 }

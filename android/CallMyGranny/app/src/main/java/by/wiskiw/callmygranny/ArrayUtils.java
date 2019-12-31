@@ -1,5 +1,8 @@
 package by.wiskiw.callmygranny;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author Andrey Yablonsky on 03.12.2019
  */
@@ -23,5 +26,25 @@ public class ArrayUtils {
         }
 
         return result;
+    }
+
+    public static List<byte[]> divideForParts(int partSize, byte[] src) {
+        int packsCount = (int) Math.ceil(src.length / (float) partSize);
+        List<byte[]> packs = new ArrayList<>(packsCount);
+
+        for (int packIndex = 0; packIndex < packsCount; packIndex++) {
+            byte[] pack = new byte[partSize];
+
+            int startIndex = packIndex * partSize;
+
+            boolean isFullPack = startIndex + partSize <= src.length;
+            int byteCount = isFullPack
+                ? partSize
+                : src.length - startIndex;
+
+            System.arraycopy(src, startIndex, pack, 0, byteCount);
+            packs.add(pack);
+        }
+        return packs;
     }
 }

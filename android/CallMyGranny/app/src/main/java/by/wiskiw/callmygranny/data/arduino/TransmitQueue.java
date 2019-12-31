@@ -13,12 +13,6 @@ import by.wiskiw.callmygranny.data.arduino.boardcommunicator.BoardCommunicator;
  */
 public class TransmitQueue {
 
-    // ms
-    public static final int POST_DELAY_SMALL = 80;
-    public static final int POST_DELAY_REGULAR = 100;
-    public static final int POST_DELAY_LARGE = 130;
-    private static final int DEFAULT_POST_DELAY = POST_DELAY_SMALL;
-
     private final Handler delayHandler = new Handler();
     private final Queue<RequestMeta> requestQueue = new LinkedList<>();
     private final BoardCommunicator boardCommunicator;
@@ -48,10 +42,6 @@ public class TransmitQueue {
         trySendNext();
     }
 
-    public void send(byte[] data, BoardCommunicator.SendListener sendListener) {
-        send(data, DEFAULT_POST_DELAY, sendListener);
-    }
-
     private void trySendNext() {
         if (!requestQueue.isEmpty()) {
             RequestMeta next = requestQueue.poll();
@@ -75,7 +65,13 @@ public class TransmitQueue {
         @Override
         public void onSuccess() {
             sendListener.onSuccess();
-            delayHandler.postDelayed(new SendNextDelayedRunnable(), postDelay);
+
+            // для корректного тестирования
+            if (postDelay > 0) {
+                delayHandler.postDelayed(new SendNextDelayedRunnable(), postDelay);
+            } else {
+                trySendNext();
+            }
         }
 
         @Override
@@ -83,23 +79,6 @@ public class TransmitQueue {
             sendListener.onFailed();
         }
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-
-            SendListenerWrapper that = (SendListenerWrapper) o;
-            return sendListener.equals(that.sendListener);
-        }
-
-        @Override
-        public int hashCode() {
-            return sendListener.hashCode();
-        }
     }
 
     private final class SendNextDelayedRunnable implements Runnable {
