@@ -1,7 +1,11 @@
 package by.wiskiw.callmygranny.data.arduino;
 
 import org.junit.Test;
+import org.mockito.InOrder;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
@@ -25,7 +29,7 @@ public class TransmitControllerTest {
             .setSendDelayEnabled(false)
             .create();
 
-        byte[] payload = TestUtils.generateStubBytes(64 * 3);
+        byte[] payload = TestUtils.generateStubBytes(TransmitController.PACK_SIZE_BYTE * 3);
         TransmitController.Listener mockSendListener = mock(TransmitController.Listener.class);
         transmitController.send(payload, mockSendListener);
 
@@ -40,7 +44,7 @@ public class TransmitControllerTest {
             .setSendDelayEnabled(false)
             .create();
 
-        byte[] payload = TestUtils.generateStubBytes(54 * 4);
+        byte[] payload = TestUtils.generateStubBytes(TransmitController.PACK_SIZE_BYTE * 4);
         TransmitController.Listener mockSendListener = mock(TransmitController.Listener.class);
         transmitController.send(payload, mockSendListener);
 
@@ -60,7 +64,12 @@ public class TransmitControllerTest {
         TransmitController.Listener mockSendListener = mock(TransmitController.Listener.class);
         transmitController.send(payload, mockSendListener);
 
-        verify(mockSendListener, timeout(30).atLeastOnce()).onSuccess();
+        InOrder listenerInOrderWrapper = inOrder(mockSendListener);
+        listenerInOrderWrapper.verify(mockSendListener).onProgressChanged(anyInt(), eq(0));
+        listenerInOrderWrapper.verify(mockSendListener).onProgressChanged(anyInt(), eq(1));
+        listenerInOrderWrapper.verify(mockSendListener).onProgressChanged(anyInt(), eq(3));
+        listenerInOrderWrapper.verify(mockSendListener, timeout(30).atLeastOnce()).onSuccess();
+
         verify(mockSendListener, never()).onFailed();
     }
 
