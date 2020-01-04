@@ -6,6 +6,7 @@ import by.wiskiw.callmygranny.ArrayUtils;
 import by.wiskiw.callmygranny.data.arduino.boardcommunicator.BoardCommunicator;
 import by.wiskiw.callmygranny.data.arduino.encoding.ByteDecoder;
 import by.wiskiw.callmygranny.data.arduino.encoding.ByteEncoder;
+import by.wiskiw.callmygranny.data.arduino.header.TransmitHeaderBuilder;
 
 /**
  * Реализует отправку массива байт любой длинны через {@link TransmitQueue}
@@ -31,10 +32,16 @@ public class TransmitController {
 
     private boolean isSendDelayEnabled = true;
 
-    public TransmitController(TransmitQueue transmitQueue, ByteEncoder encoder, ByteDecoder decoder) {
+    private TransmitHeaderBuilder headerBuilder;
+
+    public TransmitController(TransmitQueue transmitQueue, ByteEncoder encoder, ByteDecoder decoder,
+        TransmitHeaderBuilder headerBuilder) {
+
         this.transmitQueue = transmitQueue;
         this.encoder = encoder;
         this.decoder = decoder;
+
+        this.headerBuilder = headerBuilder;
     }
 
     public void setSendDelayEnabled(boolean sendDelayEnabled) {
@@ -53,7 +60,7 @@ public class TransmitController {
         byte[] encodedBytes = encoder.encode(data);
 
         List<byte[]> packs = ArrayUtils.divideForParts(PACK_SIZE_BYTE, encodedBytes);
-        byte[] header = createHeader(HEADER_SIZE_BYTE, encodedBytes, packs);
+        byte[] header = headerBuilder.build(HEADER_SIZE_BYTE, encodedBytes, packs);
 
         startTransaction(header, packs, sendListener);
     }
@@ -76,12 +83,6 @@ public class TransmitController {
 
     private long getSendDelay() {
         return isSendDelayEnabled ? POST_SEND_DELAY : 0;
-    }
-
-    private static byte[] createHeader(int headerSize, byte[] rawData, List<byte[]> packs) {
-        // не должен содержать 0-байт символов
-        // todo: createHeader
-        return new byte[headerSize];
     }
 
     private final class BoardSendListener implements BoardCommunicator.SendListener {

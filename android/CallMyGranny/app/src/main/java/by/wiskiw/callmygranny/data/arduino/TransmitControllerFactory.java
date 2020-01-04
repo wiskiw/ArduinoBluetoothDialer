@@ -1,9 +1,12 @@
 package by.wiskiw.callmygranny.data.arduino;
 
+import java.util.List;
+
 import androidx.annotation.NonNull;
 import by.wiskiw.callmygranny.data.arduino.boardcommunicator.BoardCommunicator;
 import by.wiskiw.callmygranny.data.arduino.encoding.ByteDecoder;
 import by.wiskiw.callmygranny.data.arduino.encoding.ByteEncoder;
+import by.wiskiw.callmygranny.data.arduino.header.TransmitHeaderBuilder;
 
 /**
  * Фабрика создания {@link TransmitController}
@@ -16,6 +19,8 @@ public class TransmitControllerFactory {
 
     private ByteEncoder encoder = new NonByteEncoder();
     private ByteDecoder decoder = new NonByteDecoder();
+
+    private TransmitHeaderBuilder headerBuilder = new EmptyHeadBuilder();
 
     private boolean isSendDelayEnabled = true;
 
@@ -34,6 +39,11 @@ public class TransmitControllerFactory {
         return this;
     }
 
+    public TransmitControllerFactory setHeaderBuilder(@NonNull TransmitHeaderBuilder headerBuilder) {
+        this.headerBuilder = headerBuilder;
+        return this;
+    }
+
     public TransmitControllerFactory setSendDelayEnabled(boolean sendDelayEnabled) {
         isSendDelayEnabled = sendDelayEnabled;
         return this;
@@ -41,7 +51,7 @@ public class TransmitControllerFactory {
 
     public TransmitController create() {
         TransmitQueue transmitQueue = new TransmitQueue(boardCommunicator);
-        TransmitController controller = new TransmitController(transmitQueue, encoder, decoder);
+        TransmitController controller = new TransmitController(transmitQueue, encoder, decoder, headerBuilder);
         controller.setSendDelayEnabled(isSendDelayEnabled);
         return controller;
     }
@@ -59,6 +69,14 @@ public class TransmitControllerFactory {
         @Override
         public byte[] decode(byte[] bytes) {
             return bytes;
+        }
+    }
+
+    public static final class EmptyHeadBuilder implements TransmitHeaderBuilder {
+
+        @Override
+        public byte[] build(int headerSize, byte[] rawData, List<byte[]> packs) {
+            return new byte[0];
         }
     }
 }
