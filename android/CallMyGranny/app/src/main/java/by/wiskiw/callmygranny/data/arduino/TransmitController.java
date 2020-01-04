@@ -4,6 +4,7 @@ import java.util.List;
 
 import by.wiskiw.callmygranny.ArrayUtils;
 import by.wiskiw.callmygranny.data.arduino.boardcommunicator.BoardCommunicator;
+import by.wiskiw.callmygranny.data.arduino.encoding.ByteDecoder;
 import by.wiskiw.callmygranny.data.arduino.encoding.ByteEncoder;
 
 /**
@@ -26,74 +27,55 @@ public class TransmitController {
 
     private final TransmitQueue transmitQueue;
     private final ByteEncoder encoder;
+    private final ByteDecoder decoder;
 
     private boolean isSendDelayEnabled = true;
 
-    public TransmitController(TransmitQueue transmitQueue, ByteEncoder encoder) {
+    public TransmitController(TransmitQueue transmitQueue, ByteEncoder encoder, ByteDecoder decoder) {
         this.transmitQueue = transmitQueue;
         this.encoder = encoder;
+        this.decoder = decoder;
     }
 
     public void setSendDelayEnabled(boolean sendDelayEnabled) {
         isSendDelayEnabled = sendDelayEnabled;
     }
 
-    public void send(byte[] data, Listener listener) {
+    public void addReceiveListener(ReceiveListener listener) {
+        transmitQueue.addPayloadListener(new BoardPayloadListener(listener));
+    }
+
+    public void removeReceiveListener(ReceiveListener listener) {
+        transmitQueue.removePayloadListener(new BoardPayloadListener(listener));
+    }
+
+    public void send(byte[] data, SendListener sendListener) {
         byte[] encodedBytes = encoder.encode(data);
 
         List<byte[]> packs = ArrayUtils.divideForParts(PACK_SIZE_BYTE, encodedBytes);
         byte[] header = createHeader(HEADER_SIZE_BYTE, encodedBytes, packs);
 
-        startTransaction(header, packs, listener);
+        startTransaction(header, packs, sendListener);
     }
 
-    private void startTransaction(byte[] header, List<byte[]> packs, Listener listener) {
+    private void startTransaction(byte[] header, List<byte[]> packs, SendListener sendListener) {
         int headerPacksCount = 1;
         int allPacksCount = headerPacksCount + packs.size();
-        listener.onProgressChanged(allPacksCount, 0);
+        sendListener.onProgressChanged(allPacksCount, 0);
 
-        transmitQueue.send(header, getSendDelay(), new SendListener(listener, allPacksCount, 1));
+        transmitQueue.send(header, getSendDelay(), new BoardSendListener(sendListener, allPacksCount, 1));
 
         for (int packIndex = 0; packIndex < packs.size(); packIndex++) {
             byte[] pack = packs.get(packIndex);
 
             // packIndex + 1 - переход от индекса к номеру
             int packNumber = headerPacksCount + packIndex + 1;
-            transmitQueue.send(pack, getSendDelay(), new SendListener(listener, allPacksCount, packNumber));
+            transmitQueue.send(pack, getSendDelay(), new BoardSendListener(sendListener, allPacksCount, packNumber));
         }
     }
 
     private long getSendDelay() {
         return isSendDelayEnabled ? POST_SEND_DELAY : 0;
-    }
-
-    private final class SendListener implements BoardCommunicator.SendListener {
-
-        private final Listener listener;
-        private final int packsCount;
-        private final int currentPackNumber;
-
-        private SendListener(Listener listener, int packsCount, int currentPackNumber) {
-            this.listener = listener;
-            this.packsCount = packsCount;
-            this.currentPackNumber = currentPackNumber;
-        }
-
-        @Override
-        public void onSuccess() {
-            listener.onProgressChanged(packsCount, currentPackNumber);
-
-            if (packsCount == currentPackNumber) {
-                // последний был отправлен успешно
-                listener.onSuccess();
-            }
-        }
-
-        @Override
-        public void onFailed() {
-            // ошибка отправки одного из пакетов
-            listener.onFailed();
-        }
     }
 
     private static byte[] createHeader(int headerSize, byte[] rawData, List<byte[]> packs) {
@@ -102,13 +84,86 @@ public class TransmitController {
         return new byte[headerSize];
     }
 
-    public interface Listener {
+    private final class BoardSendListener implements BoardCommunicator.SendListener {
+
+        private final SendListener sendListener;
+        private final int packsCount;
+        private final int currentPackNumber;
+
+        private BoardSendListener(SendListener sendListener, int packsCount, int currentPackNumber) {
+            this.sendListener = sendListener;
+            this.packsCount = packsCount;
+            this.currentPackNumber = currentPackNumber;
+        }
+
+        @Override
+        public void onSuccess() {
+            sendListener.onProgressChanged(packsCount, currentPackNumber);
+
+            if (packsCount == currentPackNumber) {
+                // последний был отправлен успешно
+                sendListener.onSuccess();
+            }
+        }
+
+        @Override
+        public void onFailed() {
+            // ошибка отправки одного из пакетов
+            sendListener.onFailed();
+        }
+    }
+
+    private final class BoardPayloadListener implements BoardCommunicator.PayloadListener {
+
+        private final ReceiveListener listener;
+
+        private BoardPayloadListener(ReceiveListener listener) {
+            this.listener = listener;
+        }
+
+        @Override
+        public void onPayloadReceived(byte[] payload) {
+            // todo проверить на необходимость объединять несколько маленьких пакетов в большой
+            // возможно добавить что-то вроде receive buffer или CatchingQueue
+            // тогда реализовывать timeout получения пакетов тут
+
+            byte[] decodedData = decoder.decode(payload);
+            listener.onReceive(decodedData);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+
+            BoardPayloadListener that = (BoardPayloadListener) o;
+
+            return listener.equals(that.listener);
+        }
+
+        @Override
+        public int hashCode() {
+            return listener.hashCode();
+        }
+    }
+
+    public interface SendListener {
 
         void onSuccess();
 
         void onProgressChanged(int allCount, int transferredCount);
 
         void onFailed();
+
+    }
+
+    public interface ReceiveListener {
+
+        void onReceive(byte[] data);
 
     }
 

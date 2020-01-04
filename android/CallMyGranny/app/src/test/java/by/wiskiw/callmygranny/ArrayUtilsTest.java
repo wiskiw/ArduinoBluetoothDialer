@@ -38,8 +38,8 @@ public class ArrayUtilsTest {
     }
 
     private void testDivideForParts(int fullPackCount, int packSize, int lastPackSize) {
-        byte[] twoNotFullPacksData = TestUtils.generateStubBytes(packSize * fullPackCount + lastPackSize);
-        List<byte[]> packs = ArrayUtils.divideForParts(packSize, twoNotFullPacksData);
+        byte[] sourceBytes = TestUtils.generateStubBytes(packSize * fullPackCount + lastPackSize);
+        List<byte[]> packs = ArrayUtils.divideForParts(packSize, sourceBytes);
 
         assertNotNull(packs);
 
@@ -47,7 +47,7 @@ public class ArrayUtilsTest {
             assertFalse(packs.isEmpty());
 
             byte[] expected = packs.get(0);
-            byte[] actual = Arrays.copyOfRange(twoNotFullPacksData, 0, packSize);
+            byte[] actual = Arrays.copyOfRange(sourceBytes, 0, packSize);
             compareArrays(expected, actual);
         }
 
@@ -55,7 +55,7 @@ public class ArrayUtilsTest {
             byte[] lastPack = packs.get(packs.size() - 1);
             byte[] expectedLastPack = new byte[packSize];
 
-            System.arraycopy(twoNotFullPacksData, twoNotFullPacksData.length - lastPackSize,
+            System.arraycopy(sourceBytes, sourceBytes.length - lastPackSize,
                 expectedLastPack, 0, lastPackSize);
 
             compareArrays(expectedLastPack, lastPack);

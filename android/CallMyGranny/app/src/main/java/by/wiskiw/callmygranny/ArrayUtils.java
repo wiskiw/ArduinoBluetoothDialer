@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * todo: comments
  * @author Andrey Yablonsky on 03.12.2019
  */
 public class ArrayUtils {
@@ -46,5 +47,11 @@ public class ArrayUtils {
             packs.add(pack);
         }
         return packs;
+    }
+
+    public static byte[] byteListToArray(List<Byte> list) {
+        int count = list.size();
+        Byte[] array = list.toArray(new Byte[count]);
+        return org.apache.commons.lang3.ArrayUtils.toPrimitive(array);
     }
 }

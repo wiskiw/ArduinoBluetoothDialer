@@ -4,8 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.ArrayUtils;
-
+import by.wiskiw.callmygranny.ArrayUtils;
 import by.wiskiw.callmygranny.BitUtils;
 
 /**
@@ -24,7 +23,7 @@ public final class NonZeroTwoWayByteEncoder implements ByteEncoder, ByteDecoder 
             BytesSegment segment = createBytesSegment(inputStream);
             encoded.addAll(segment.getEncodeSegment());
         }
-        return byteListToArray(encoded);
+        return ArrayUtils.byteListToArray(encoded);
     }
 
     @Override
@@ -36,13 +35,7 @@ public final class NonZeroTwoWayByteEncoder implements ByteEncoder, ByteDecoder 
             List<Byte> segmentBytes = decodedSegmentBytes(inputStream);
             encoded.addAll(segmentBytes);
         }
-        return byteListToArray(encoded);
-    }
-
-    private static byte[] byteListToArray(List<Byte> list) {
-        int count = list.size();
-        Byte[] array = list.toArray(new Byte[count]);
-        return ArrayUtils.toPrimitive(array);
+        return ArrayUtils.byteListToArray(encoded);
     }
 
     private BytesSegment createBytesSegment(ByteArrayInputStream inputStream) {
