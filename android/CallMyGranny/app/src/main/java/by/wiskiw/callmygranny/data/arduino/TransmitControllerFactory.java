@@ -29,6 +29,11 @@ public class TransmitControllerFactory {
         return this;
     }
 
+    public TransmitControllerFactory setHeaderBuilder(@NonNull TransmitHeaderBuilder headerBuilder) {
+        this.headerBuilder = headerBuilder;
+        return this;
+    }
+
     public TransmitControllerFactory setEncoder(@NonNull ByteEncoder encoder) {
         this.encoder = encoder;
         return this;
@@ -39,11 +44,6 @@ public class TransmitControllerFactory {
         return this;
     }
 
-    public TransmitControllerFactory setHeaderBuilder(@NonNull TransmitHeaderBuilder headerBuilder) {
-        this.headerBuilder = headerBuilder;
-        return this;
-    }
-
     public TransmitControllerFactory setSendDelayEnabled(boolean sendDelayEnabled) {
         isSendDelayEnabled = sendDelayEnabled;
         return this;
@@ -51,7 +51,7 @@ public class TransmitControllerFactory {
 
     public TransmitController create() {
         TransmitQueue transmitQueue = new TransmitQueue(boardCommunicator);
-        TransmitController controller = new TransmitController(transmitQueue, encoder, decoder, headerBuilder);
+        TransmitController controller = new TransmitController(transmitQueue, headerBuilder, encoder, decoder);
         controller.setSendDelayEnabled(isSendDelayEnabled);
         return controller;
     }
@@ -75,7 +75,7 @@ public class TransmitControllerFactory {
     public static final class EmptyHeadBuilder implements TransmitHeaderBuilder {
 
         @Override
-        public byte[] build(int headerSize, byte[] rawData, List<byte[]> packs) {
+        public byte[] build(int maxHeaderSize, byte[] rawData, List<byte[]> packs) {
             return new byte[0];
         }
     }

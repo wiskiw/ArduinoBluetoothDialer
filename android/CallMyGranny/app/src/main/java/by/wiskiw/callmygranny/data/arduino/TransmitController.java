@@ -27,21 +27,21 @@ public class TransmitController {
     public static final int PACK_SIZE_BYTE = 56;
 
     private final TransmitQueue transmitQueue;
+    private final TransmitHeaderBuilder headerBuilder;
     private final ByteEncoder encoder;
     private final ByteDecoder decoder;
 
     private boolean isSendDelayEnabled = true;
 
-    private TransmitHeaderBuilder headerBuilder;
 
-    public TransmitController(TransmitQueue transmitQueue, ByteEncoder encoder, ByteDecoder decoder,
-        TransmitHeaderBuilder headerBuilder) {
+    public TransmitController(TransmitQueue transmitQueue, TransmitHeaderBuilder headerBuilder,
+        ByteEncoder encoder, ByteDecoder decoder) {
 
         this.transmitQueue = transmitQueue;
+        this.headerBuilder = headerBuilder;
+
         this.encoder = encoder;
         this.decoder = decoder;
-
-        this.headerBuilder = headerBuilder;
     }
 
     public void setSendDelayEnabled(boolean sendDelayEnabled) {

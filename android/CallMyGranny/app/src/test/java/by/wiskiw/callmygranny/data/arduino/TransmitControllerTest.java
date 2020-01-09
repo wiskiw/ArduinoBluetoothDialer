@@ -23,6 +23,7 @@ import by.wiskiw.callmygranny.data.arduino.boardcommunicator.MirrorBoardCommunic
 import by.wiskiw.callmygranny.data.arduino.encoding.ByteDecoder;
 import by.wiskiw.callmygranny.data.arduino.encoding.ByteEncoder;
 import by.wiskiw.callmygranny.data.arduino.encoding.NonZeroTwoWayByteEncoder;
+import by.wiskiw.callmygranny.data.arduino.header.BK8000LHeaderBuilder;
 
 /**
  * Tests for {@link TransmitController}
@@ -92,15 +93,13 @@ public class TransmitControllerTest {
     @Test
     public void controllerWithNonZeroTwoWayByteEncoderTest() {
         NonZeroTwoWayByteEncoder encoderDecoder = new NonZeroTwoWayByteEncoder();
-        byte[] payload = TestUtils.generateStubBytes(
-            TransmitController.PACK_SIZE_BYTE * 4 + TransmitController.PACK_SIZE_BYTE / 3);
+        byte[] payload = TestUtils.generateStubBytes(TransmitController.PACK_SIZE_BYTE * 4 + 13);
 
         controllerWithEncodingTest(encoderDecoder, encoderDecoder, payload);
     }
 
     private static void controllerWithEncodingTest(ByteEncoder encoder, ByteDecoder decoder, byte[] payload) {
         HandleMirrorBoardCommunicator communicator = new HandleMirrorBoardCommunicator();
-        communicator.skipHeaderBytes(TransmitController.HEADER_SIZE_BYTE);
 
         TransmitController transmitController = new TransmitControllerFactory()
             .setBoardCommunicator(communicator)
