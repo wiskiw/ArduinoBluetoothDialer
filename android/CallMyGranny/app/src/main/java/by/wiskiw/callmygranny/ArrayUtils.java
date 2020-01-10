@@ -1,6 +1,7 @@
 package by.wiskiw.callmygranny;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -53,5 +54,10 @@ public class ArrayUtils {
         int count = list.size();
         Byte[] array = list.toArray(new Byte[count]);
         return org.apache.commons.lang3.ArrayUtils.toPrimitive(array);
+    }
+
+    public static List<Byte> byteArrayToList(byte[] array) {
+        Byte[] byteObjectArray = org.apache.commons.lang3.ArrayUtils.toObject(array);
+        return Arrays.asList(byteObjectArray);
     }
 }
