@@ -32,7 +32,7 @@ public class BitUtils {
      * @return {@code true}, если значение бита с индексом #bitIndex == 1
      */
     public static boolean isBitUp(byte b, int bitIndex) {
-        return (bitShiftRight(b, bitIndex) & LAST_BIT_UP_MASK) > 0;
+        return (bitShiftRight(b, invertBitIndex(bitIndex)) & LAST_BIT_UP_MASK) > 0;
     }
 
     /**
@@ -40,12 +40,16 @@ public class BitUtils {
      * @return измененный байт
      */
     public static byte setBitUp(byte b, int bitIndex) {
-        byte upBitMask = bitShiftLeft(LAST_BIT_UP_MASK, bitIndex);
+        byte upBitMask = bitShiftLeft(LAST_BIT_UP_MASK, invertBitIndex(bitIndex));
         return (byte) (b | upBitMask);
     }
 
     public static String byteToStringBinary(byte value) {
         return String.format("%8s", Integer.toBinaryString(value & 0xFF)).replace(' ', '0');
+    }
+
+    private static int invertBitIndex(int bitIndex) {
+        return Byte.SIZE - bitIndex - 1;
     }
 
 }

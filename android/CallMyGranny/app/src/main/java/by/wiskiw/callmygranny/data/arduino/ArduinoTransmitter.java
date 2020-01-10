@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import android.os.Handler;
 import by.wiskiw.callmygranny.Logger;
-import by.wiskiw.callmygranny.data.arduino.encoding.NonZeroTwoWayByteEncoder;
+import by.wiskiw.callmygranny.data.arduino.encoding.nonzero.NonZeroTwoWayByteEncoder;
 import by.wiskiw.callmygranny.data.bluetooth.service.BluetoothService;
 
 /**

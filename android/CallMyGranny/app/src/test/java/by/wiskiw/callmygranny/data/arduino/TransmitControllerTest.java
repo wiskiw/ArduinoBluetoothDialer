@@ -22,8 +22,7 @@ import by.wiskiw.callmygranny.data.arduino.boardcommunicator.HandleMirrorBoardCo
 import by.wiskiw.callmygranny.data.arduino.boardcommunicator.MirrorBoardCommunicator;
 import by.wiskiw.callmygranny.data.arduino.encoding.ByteDecoder;
 import by.wiskiw.callmygranny.data.arduino.encoding.ByteEncoder;
-import by.wiskiw.callmygranny.data.arduino.encoding.NonZeroTwoWayByteEncoder;
-import by.wiskiw.callmygranny.data.arduino.header.BK8000LHeaderBuilder;
+import by.wiskiw.callmygranny.data.arduino.encoding.nonzero.NonZeroTwoWayByteEncoder;
 
 /**
  * Tests for {@link TransmitController}
@@ -93,12 +92,15 @@ public class TransmitControllerTest {
     @Test
     public void controllerWithNonZeroTwoWayByteEncoderTest() {
         NonZeroTwoWayByteEncoder encoderDecoder = new NonZeroTwoWayByteEncoder();
-        byte[] payload = TestUtils.generateStubBytes(TransmitController.PACK_SIZE_BYTE * 4 + 13);
+//        byte[] payload = TestUtils.generateStubBytes(8);
+        byte[] payload = new byte[] {3, 31, 82, -102, 0, -121, -93, 77};
 
         controllerWithEncodingTest(encoderDecoder, encoderDecoder, payload);
     }
 
     private static void controllerWithEncodingTest(ByteEncoder encoder, ByteDecoder decoder, byte[] payload) {
+        System.out.println(String.format("payload: %s", Arrays.toString(payload)));
+
         HandleMirrorBoardCommunicator communicator = new HandleMirrorBoardCommunicator();
 
         TransmitController transmitController = new TransmitControllerFactory()
@@ -116,10 +118,9 @@ public class TransmitControllerTest {
 
         communicator.invokeOnPayloadReceived();
 
-        InOrder listenerInOrderWrapper = inOrder(mockReceiveListener, mockSendListener);
-        listenerInOrderWrapper.verify(mockSendListener, atLeastOnce()).onSuccess();
-        listenerInOrderWrapper.verify(mockReceiveListener).onReceive(argThat(new BytesStartWithMatcher(payload, payload.length)));
+        verify(mockSendListener).onSuccess();
         verify(mockSendListener, never()).onFailed();
+        verify(mockReceiveListener).onReceive(argThat(new BytesStartWithMatcher(payload, payload.length)));
     }
 
     private static final class BytesStartWithMatcher implements ArgumentMatcher<byte[]> {

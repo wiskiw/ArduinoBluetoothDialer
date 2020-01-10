@@ -17,6 +17,8 @@ public class TransmitQueue {
     private final Queue<RequestMeta> requestQueue = new LinkedList<>();
     private final BoardCommunicator boardCommunicator;
 
+    private boolean inProgress = false;
+
     public TransmitQueue(BoardCommunicator boardCommunicator) {
         this.boardCommunicator = boardCommunicator;
     }
@@ -43,9 +45,10 @@ public class TransmitQueue {
     }
 
     private void trySendNext() {
-        if (!requestQueue.isEmpty()) {
+        if (!inProgress && !requestQueue.isEmpty()) {
             RequestMeta next = requestQueue.poll();
             if (next != null) {
+                inProgress = true;
                 SendListenerWrapper listenerWrapper = new SendListenerWrapper(next.sendListener, next.postDelay);
                 boardCommunicator.send(next.data, listenerWrapper);
             }
@@ -64,6 +67,7 @@ public class TransmitQueue {
 
         @Override
         public void onSuccess() {
+            inProgress = false;
             sendListener.onSuccess();
 
             // для корректного тестирования
@@ -76,6 +80,7 @@ public class TransmitQueue {
 
         @Override
         public void onFailed() {
+            inProgress = false;
             sendListener.onFailed();
         }
 
