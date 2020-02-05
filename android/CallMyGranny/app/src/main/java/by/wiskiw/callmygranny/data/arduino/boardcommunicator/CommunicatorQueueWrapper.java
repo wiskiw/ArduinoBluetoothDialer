@@ -1,50 +1,52 @@
-package by.wiskiw.callmygranny.data.arduino;
+package by.wiskiw.callmygranny.data.arduino.boardcommunicator;
 
 import java.util.LinkedList;
 import java.util.Queue;
 
 import android.os.Handler;
-import by.wiskiw.callmygranny.data.arduino.boardcommunicator.BoardCommunicator;
 
 /**
- * Последовательно отправляет запросы через {@link BoardCommunicator}. Гарантирует сохранение очередности отправки запросов.
+ * Обертка для {@link BoardCommunicator} позволяющая добавлять запросы в очередь
+ * и отправлять их последовательно {@link BoardCommunicator}.
+ * Гарантирует сохранение очередности отправки запросов.
  *
  * @author Andrey Yablonsky on 30.12.2019
  */
-public class TransmitQueue {
+public class CommunicatorQueueWrapper implements BoardCommunicator {
+
+    private static final int DEFAULT_POST_DELAY = 80;
 
     private final Handler delayHandler = new Handler();
     private final Queue<RequestMeta> requestQueue = new LinkedList<>();
     private final BoardCommunicator boardCommunicator;
+    private final long postDelay;
 
     private boolean inProgress = false;
 
-    public TransmitQueue(BoardCommunicator boardCommunicator) {
+
+    public CommunicatorQueueWrapper(BoardCommunicator boardCommunicator, long postDelay) {
         this.boardCommunicator = boardCommunicator;
+        this.postDelay = postDelay;
     }
 
-    public void addPayloadListener(BoardCommunicator.PayloadListener payloadListener) {
-        boardCommunicator.addPayloadListener(payloadListener);
+    public CommunicatorQueueWrapper(BoardCommunicator boardCommunicator) {
+        this(boardCommunicator, DEFAULT_POST_DELAY);
     }
 
-    public void removePayloadListener(BoardCommunicator.PayloadListener payloadListener) {
-        boardCommunicator.removePayloadListener(payloadListener);
+    @Override
+    public void setPayloadListener(PayloadListener payloadListener) {
+        boardCommunicator.setPayloadListener(payloadListener);
     }
 
-    /**
-     * @param data
-     * @param postDelay - задержка перед отправкой последующего запроса
-     * @param sendListener
-     */
-    public void send(byte[] data, long postDelay, BoardCommunicator.SendListener sendListener) {
-        RequestMeta meta = new RequestMeta(data, sendListener);
-        meta.setPostDalay(postDelay);
+    @Override
+    public void send(byte[] data, SendListener sendListener) {
+        RequestMeta meta = new RequestMeta(data, postDelay, sendListener);
         requestQueue.add(meta);
 
         trySendNext();
     }
 
-    private void trySendNext() {
+    private synchronized void trySendNext() {
         if (!inProgress && !requestQueue.isEmpty()) {
             RequestMeta next = requestQueue.poll();
             if (next != null) {
@@ -97,17 +99,13 @@ public class TransmitQueue {
     private final class RequestMeta {
 
         private final byte[] data;
+        private final long postDelay;
         private final BoardCommunicator.SendListener sendListener;
-        private long postDelay = 0L;
 
-        private RequestMeta(byte[] data, BoardCommunicator.SendListener sendListener) {
+        private RequestMeta(byte[] data, long postDelay, BoardCommunicator.SendListener sendListener) {
             this.data = data;
+            this.postDelay = postDelay;
             this.sendListener = sendListener;
         }
-
-        public void setPostDalay(long postDelay) {
-            this.postDelay = postDelay;
-        }
     }
-
 }

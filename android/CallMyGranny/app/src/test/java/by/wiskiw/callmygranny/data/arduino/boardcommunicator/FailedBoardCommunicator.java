@@ -8,15 +8,9 @@ package by.wiskiw.callmygranny.data.arduino.boardcommunicator;
  */
 public class FailedBoardCommunicator implements BoardCommunicator {
 
-
     @Override
-    public void addPayloadListener(PayloadListener payloadListener) {
-        // not required
-    }
-
-    @Override
-    public void removePayloadListener(PayloadListener payloadListener) {
-        // not required
+    public void setPayloadListener(PayloadListener payloadListener) {
+        // implementation is not required
     }
 
     @Override

@@ -18,7 +18,6 @@ import static org.mockito.Mockito.verify;
 import androidx.annotation.NonNull;
 import by.wiskiw.callmygranny.TestUtils;
 import by.wiskiw.callmygranny.data.arduino.boardcommunicator.FailedBoardCommunicator;
-import by.wiskiw.callmygranny.data.arduino.boardcommunicator.HandleMirrorBoardCommunicator;
 import by.wiskiw.callmygranny.data.arduino.boardcommunicator.MirrorBoardCommunicator;
 import by.wiskiw.callmygranny.data.arduino.encoding.ByteDecoder;
 import by.wiskiw.callmygranny.data.arduino.encoding.ByteEncoder;
@@ -35,7 +34,6 @@ public class TransmitControllerTest {
     public void simpleSuccessSendTest() {
         TransmitController transmitController = new TransmitControllerFactory()
             .setBoardCommunicator(new MirrorBoardCommunicator())
-            .setSendDelayEnabled(false)
             .create();
 
         byte[] payload = TestUtils.generateStubBytes(TransmitController.PACK_SIZE_BYTE * 3);
@@ -50,7 +48,6 @@ public class TransmitControllerTest {
     public void simpleFailedSendTest() {
         TransmitController transmitController = new TransmitControllerFactory()
             .setBoardCommunicator(new FailedBoardCommunicator())
-            .setSendDelayEnabled(false)
             .create();
 
         byte[] payload = TestUtils.generateStubBytes(TransmitController.PACK_SIZE_BYTE * 4);
@@ -65,7 +62,6 @@ public class TransmitControllerTest {
     public void progressedSuccessSendTest() {
         TransmitController transmitController = new TransmitControllerFactory()
             .setBoardCommunicator(new MirrorBoardCommunicator())
-            .setSendDelayEnabled(false)
             .create();
 
         byte[] payload = TestUtils.generateStubBytes(TransmitController.PACK_SIZE_BYTE * 3);
@@ -92,22 +88,18 @@ public class TransmitControllerTest {
     @Test
     public void controllerWithNonZeroTwoWayByteEncoderTest() {
         NonZeroTwoWayByteEncoder encoderDecoder = new NonZeroTwoWayByteEncoder();
-//        byte[] payload = TestUtils.generateStubBytes(8);
-        byte[] payload = new byte[] {3, 31, 82, -102, 0, -121, -93, 77};
+        byte[] payload = TestUtils.generateStubBytes(8);
 
         controllerWithEncodingTest(encoderDecoder, encoderDecoder, payload);
     }
 
     private static void controllerWithEncodingTest(ByteEncoder encoder, ByteDecoder decoder, byte[] payload) {
-        System.out.println(String.format("payload: %s", Arrays.toString(payload)));
-
-        HandleMirrorBoardCommunicator communicator = new HandleMirrorBoardCommunicator();
+        MirrorBoardCommunicator communicator = new MirrorBoardCommunicator();
 
         TransmitController transmitController = new TransmitControllerFactory()
             .setBoardCommunicator(communicator)
             .setEncoder(encoder)
             .setDecoder(decoder)
-            .setSendDelayEnabled(false)
             .create();
 
         TransmitController.ReceiveListener mockReceiveListener = mock(TransmitController.ReceiveListener.class);

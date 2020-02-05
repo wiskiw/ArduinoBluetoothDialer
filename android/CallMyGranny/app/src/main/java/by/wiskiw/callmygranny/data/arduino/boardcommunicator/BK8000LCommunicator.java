@@ -1,8 +1,6 @@
 package by.wiskiw.callmygranny.data.arduino.boardcommunicator;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import by.wiskiw.callmygranny.data.bluetooth.service.BluetoothService;
 
@@ -26,11 +24,11 @@ public class BK8000LCommunicator implements BoardCommunicator {
     private static final byte ZERO_BYTE = 0;
 
 
-    private final List<BoardCommunicator.PayloadListener> payloadListeners = new ArrayList<>();
     private final BluetoothService bluetoothService;
 
     private State state = State.LISTENING;
     private SendListener sendListener = new EmptySendListener();
+    private BoardCommunicator.PayloadListener payloadListeners;
 
     public BK8000LCommunicator(BluetoothService bluetoothService) {
         this.bluetoothService = bluetoothService;
@@ -38,13 +36,8 @@ public class BK8000LCommunicator implements BoardCommunicator {
     }
 
     @Override
-    public void addPayloadListener(PayloadListener payloadListener) {
-        payloadListeners.add(payloadListener);
-    }
-
-    @Override
-    public void removePayloadListener(PayloadListener payloadListener) {
-        payloadListeners.remove(payloadListener);
+    public void setPayloadListener(PayloadListener payloadListener) {
+        this.payloadListeners = payloadListener;
     }
 
     @Override
@@ -74,10 +67,10 @@ public class BK8000LCommunicator implements BoardCommunicator {
     }
 
     private void onPayloadReceived(byte[] rawPayload) {
-        for (BoardCommunicator.PayloadListener listener : payloadListeners) {
+        if (payloadListeners != null){
             // todo убрать из rawPayload техническую информацию: "APR+"
             byte[] payload = rawPayload;
-            listener.onPayloadReceived(payload);
+            payloadListeners.onPayloadReceived(payload);
         }
     }
 

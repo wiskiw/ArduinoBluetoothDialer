@@ -22,8 +22,6 @@ public class TransmitControllerFactory {
 
     private TransmitHeaderBuilder headerBuilder = new EmptyHeadBuilder();
 
-    private boolean isSendDelayEnabled = true;
-
     public TransmitControllerFactory setBoardCommunicator(@NonNull BoardCommunicator boardCommunicator) {
         this.boardCommunicator = boardCommunicator;
         return this;
@@ -44,16 +42,8 @@ public class TransmitControllerFactory {
         return this;
     }
 
-    public TransmitControllerFactory setSendDelayEnabled(boolean sendDelayEnabled) {
-        isSendDelayEnabled = sendDelayEnabled;
-        return this;
-    }
-
     public TransmitController create() {
-        TransmitQueue transmitQueue = new TransmitQueue(boardCommunicator);
-        TransmitController controller = new TransmitController(transmitQueue, headerBuilder, encoder, decoder);
-        controller.setSendDelayEnabled(isSendDelayEnabled);
-        return controller;
+        return new TransmitController(boardCommunicator, headerBuilder, encoder, decoder);
     }
 
     public static final class NonByteEncoder implements ByteEncoder {

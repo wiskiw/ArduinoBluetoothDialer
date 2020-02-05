@@ -13,14 +13,9 @@ package by.wiskiw.callmygranny.data.arduino.boardcommunicator;
 public interface BoardCommunicator {
 
     /**
-     * Добавляет слушатель получения данных
+     * Устанавливает слушатель получения данных
      */
-    void addPayloadListener(PayloadListener payloadListener);
-
-    /**
-     * Убирает слушатель получения данных
-     */
-    void removePayloadListener(PayloadListener payloadListener);
+    void setPayloadListener(PayloadListener payloadListener);
 
     /**
      * Отправляет массив байт
