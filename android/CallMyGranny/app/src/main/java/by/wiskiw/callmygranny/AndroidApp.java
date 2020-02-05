@@ -2,9 +2,14 @@ package by.wiskiw.callmygranny;
 
 import android.app.Application;
 import by.wiskiw.callmygranny.data.ContactsStorage;
+import by.wiskiw.callmygranny.data.arduino.TransmitController;
+import by.wiskiw.callmygranny.data.arduino.TransmitControllerFactory;
+import by.wiskiw.callmygranny.data.arduino.boardcommunicator.BK8000LCommunicator;
+import by.wiskiw.callmygranny.data.arduino.boardcommunicator.BoardCommunicator;
+import by.wiskiw.callmygranny.data.arduino.boardcommunicator.CommunicatorQueueWrapper;
+import by.wiskiw.callmygranny.data.arduino.encoding.nonzero.NonZeroTwoWayByteEncoder;
 import by.wiskiw.callmygranny.data.bluetooth.service.Blue2SerialBluetoothService;
 import by.wiskiw.callmygranny.data.bluetooth.service.BluetoothService;
-import by.wiskiw.callmygranny.data.bluetooth.service.DouglasJuniorBluetoothService;
 import io.paperdb.Book;
 import io.paperdb.Paper;
 
@@ -19,6 +24,8 @@ public class AndroidApp extends Application {
 
     private BluetoothService bluetoothService;
 
+    private TransmitController arduinoTransmitController;
+
     public static AndroidApp getInstance() {
         return appInstance;
     }
@@ -30,9 +37,26 @@ public class AndroidApp extends Application {
 
         Paper.init(this);
         Book mainBook = Paper.book();
-
         contactsStorage = new ContactsStorage(mainBook);
-        //bluetoothService = new DouglasJuniorBluetoothService();
+
+        bluetoothService = new Blue2SerialBluetoothService();
+        bluetoothService.setup(this);
+
+        initArduino();
+    }
+
+    private void initArduino() {
+        NonZeroTwoWayByteEncoder twoWayEncoder = new NonZeroTwoWayByteEncoder();
+
+        BK8000LCommunicator bk8000LCommunicator = new BK8000LCommunicator(bluetoothService);
+        BoardCommunicator boardCommunicator = new CommunicatorQueueWrapper(bk8000LCommunicator);
+
+        arduinoTransmitController = new TransmitControllerFactory()
+            // todo .setHeaderBuilder()
+            .setEncoder(twoWayEncoder)
+            .setDecoder(twoWayEncoder)
+            .setBoardCommunicator(boardCommunicator)
+            .create();
     }
 
     public ContactsStorage getContactsStorage() {
@@ -40,6 +64,10 @@ public class AndroidApp extends Application {
     }
 
     public BluetoothService getBluetoothService() {
-        return new Blue2SerialBluetoothService();
+        return bluetoothService;
+    }
+
+    public TransmitController getArduinoTransmitController() {
+        return arduinoTransmitController;
     }
 }

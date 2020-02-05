@@ -10,7 +10,7 @@ import by.wiskiw.callmygranny.AndroidApp;
 import by.wiskiw.callmygranny.Logger;
 import by.wiskiw.callmygranny.R;
 import by.wiskiw.callmygranny.data.ContactsSerializer;
-import by.wiskiw.callmygranny.data.arduino.ArduinoTransmitter;
+import by.wiskiw.callmygranny.data.arduino.TransmitController;
 import by.wiskiw.callmygranny.data.bluetooth.service.BluetoothService;
 import by.wiskiw.callmygranny.model.ARDContact;
 
@@ -20,9 +20,11 @@ public class MainActivity extends AppCompatActivity {
 
     private AndroidApp app = AndroidApp.getInstance();
 
+    private final ReceiveListener receiveListener = new ReceiveListener();
     private final TransmitterListener transmitterListener = new TransmitterListener();
+
     private BluetoothService bluetoothService;
-    private ArduinoTransmitter transmitter;
+    private TransmitController arduinoController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,10 +32,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         bluetoothService = app.getBluetoothService();
-        bluetoothService.setReceiveListener(new BluetoothReceivceListener());
-        bluetoothService.setup(this);
 
-        transmitter = ArduinoTransmitter.getInstance(bluetoothService);
+        arduinoController = app.getArduinoTransmitController();
+        arduinoController.addReceiveListener(receiveListener);
 
         Button connect = findViewById(R.id.connect);
         connect.setOnClickListener(v -> connect());
@@ -56,26 +57,19 @@ public class MainActivity extends AppCompatActivity {
         Logger.log(getClass(), "size: " + bytes.length);
         Logger.log(getClass(), "bytes: " + Arrays.toString(bytes));
 
-        transmitter.send(bytes, transmitterListener);
-        //bluetoothService.send(bytes);
+        arduinoController.send(bytes, transmitterListener);
     }
 
-    private final class BluetoothReceivceListener implements BluetoothService.ReceiveListener {
+    private final class ReceiveListener implements TransmitController.ReceiveListener {
 
         @Override
-        public void onDataReceived(byte[] data) {
-            Logger.log(getClass(), "onDataReceived: " + Arrays.toString(data));
+        public void onReceive(byte[] data) {
+            Logger.log(getClass(), "onReceive: " + Arrays.toString(data));
         }
     }
 
 
-    private final class TransmitterListener implements ArduinoTransmitter.TransmitterListener {
-
-        @Override
-        public void onProgress(int all, int processed) {
-            Logger.log(getClass(), String.format("onProgress: %d/%d", processed, all));
-
-        }
+    private final class TransmitterListener implements TransmitController.SendListener {
 
         @Override
         public void onSuccess() {
@@ -83,13 +77,14 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onError() {
-            Logger.log(getClass(), "onError");
+        public void onProgressChanged(int allCount, int transferredCount) {
+            Logger.log(getClass(), String.format("onProgressChanged: %d/%d", transferredCount, allCount));
         }
 
         @Override
-        public void onCanceled() {
-            Logger.log(getClass(), "onCanceled");
+        public void onFailed() {
+            Logger.log(getClass(), "onFailed");
         }
+
     }
 }

@@ -59,6 +59,8 @@ public class BK8000LCommunicator implements BoardCommunicator {
 
         this.sendListener = sendListener;
         changeState(State.TRANSFERRING);
+
+        // todo check bluetoothService status first
         bluetoothService.send(data);
     }
 
